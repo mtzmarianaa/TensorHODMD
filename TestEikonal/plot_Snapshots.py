@@ -169,5 +169,40 @@ def generateAnimation(k, name = "LevelSetsExact", pathSave = path_figures):
 
 
 
-generateAnimation(79)    
+def saveSnapshots(J, name, pathSaved = path_figures, pathSaveTo = path_figures):
+    '''
+    Given J files in with the name format in the pathSaved path
+    we create the necessary file to store them in snapshot format.
+    '''
+    print("Trying to organize snapshots for " + name)
+    assert(J > 0, "We need more than 1 snapshot")
+    # Open the first file to see the dimensions we need
+    fname = pathSaved + H + "/" + H + "_" + name + "_0.txt"
+    data = np.genfromtxt(fname, delimiter =",")
+    data_flat = data.reshape(-1)
+    N = len(data_flat)
+    snapshots = np.empty((N, J-1))
+    print("Snapshot matrix of size " + str(N) + " x " + str(J-1))
+    snapshots[:, 0] = data_flat
+    # Start reading
+    print("Starting to read documents")
+    for i in range(1, J-1):
+        if(i == 50):
+            continue
+        # Read
+        fname = pathSaved + H + "/" + H + "_" + name + "_" + str(i) + ".txt"
+        data = np.genfromtxt(fname, delimiter = ",")
+        data_flat = data.reshape(-1)
+        snapshots[:, i] = data_flat
+    # Then we save
+    print("Finish reading, now saving")
+    if( name == "typeSol"):
+        np.savetxt(pathSaveTo + H + "_snapshots_" + name + ".txt", snapshots, delimiter = ", ", fmt = "%.0f")
+    else:
+        np.savetxt(pathSaveTo + H + "_snapshots_" + name + ".txt", snapshots, delimiter = ", ", fmt = "%.12f")
+    
+    
+    
+    
+#generateAnimation(79)    
             
