@@ -1,0 +1,12 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "colorcet",
+    "matplotlib",
+    "numpy",
+    "scipy",
+    "cmath",
+    "math",
+    "meshpy"
+]
+build-backend = "setuptools.build_meta"
