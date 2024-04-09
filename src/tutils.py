@@ -194,6 +194,17 @@ def dotProdTT(coresA, coresB):
         for i in range(1, nksA[k]):
             gammak += np.kron( Ak[:, i, :], Bk[:, i, :])
         v = v@gammak
+    v = np.reshape(v, (coresA[-1].shape[-1], coresB[-1].shape[-1]))
     return v
-    
+
+
+def transposeTT(cores, ranks):
+    '''
+    Given a tensor in TT format transpose it
+    '''
+    ranks = np.flip(ranks)
+    cores = cores[::-1]
+    for k in range(len(cores)):
+        cores[k] = cores[k].T
+    return cores, ranks
 
