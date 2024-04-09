@@ -34,14 +34,14 @@ nx_default = 36*spacingGrid
 ny_default = 42*spacingGrid
 my_dpi=96
 eta1 = 1.0
-eta2s = np.linspace(0.8, 1.5, 50)
+eta2s = np.linspace(0.75, 1.5, 40)
 #eta2s = np.append(eta2s, eta2s - 0.8 + 1.5)
-x0_default = np.array([-15, -10])
+x0_default = np.array([-15+0.5, -10+0.5])
 center_default = np.array([0,0])
 R_default = 10.0
-path_figures = "TestEikonal/"
-path_info = "TestEikonal/"
-H = "H1"
+path_figures = "tests/TestEikonal/TestEikonal/"
+path_info = "tests/TestEikonal/TestEikonal/"
+H = "H0"
 
 
 def plotSnapshots(H, eta1 = eta1, eta2s = eta2s, eik_coords = None, triangles_points = None, x0 = x0_default, center = center_default,
@@ -77,75 +77,75 @@ def plotSnapshots(H, eta1 = eta1, eta2s = eta2s, eik_coords = None, triangles_po
         np.savetxt(path_info + H + "/" + H + "_typeSol_" + str(k) + ".txt", typeSol, delimiter = ", ")
         np.savetxt(path_info + H + "/" + H + "_true_grads_ " + str(k) + ".txt", true_grads, delimiter = ", ", fmt = "%5.12f")
         # PLOT with linear interpolation
-        interp_lin = tri.LinearTriInterpolator(triang, true_sol)
-        zi_lin = interp_lin(xi, yi)
-        # For the gradients
-        trueGMesh = np.zeros((100, 2))
-        for i in range(10):
-            for j in range(10):
-                _, _, gMesh = trueSolution( xiG[i,j], yiG[i,j], x0, center, R, eta1, eta2)
-                trueGMesh[j + 10*i, 0] = gMesh[0]
-                trueGMesh[j + 10*i, 1] = gMesh[1]
-        # Points on triangulation and exact eikonal
-        fig = plt.figure(figsize = (800/my_dpi, 800/my_dpi), dpi = my_dpi)
-        plt.triplot( eik_coords[:, 0], eik_coords[:, 1], triangles_points, '-', c = "#d4bdff", lw = 0.3 )
-        im1 = plt.scatter(eik_coords[:, 0], eik_coords[:, 1], s = 2 + round(7500/len(eik_coords)), c = true_sol, cmap = colormap2)
-        plt.colorbar(im1)
-        plt.title("Eikonal on triangulation points, ratio=" + '{:.4f}'.format(eta2/eta1))
-        ax = plt.gca()
-        ax.set_aspect('equal')
-        ax.set_xlim([-18,18])
-        ax.set_ylim([-18,24])
-        if (saveFigures):
-            plt.savefig(path_figures + H + "/" + H + '_EikonalTriangulation_' + str(k) + '.png', dpi=my_dpi * 10)
-        # Points on triangulation, exact eikonal and gradients
-        fig = plt.figure(figsize = (800/my_dpi, 800/my_dpi), dpi = my_dpi)
-        plt.triplot( eik_coords[:, 0], eik_coords[:, 1], triangles_points, '-', c = "#d4bdff", lw = 0.3 )
-        im2 = plt.scatter(eik_coords[:, 0], eik_coords[:, 1], s = 2 + round(7000/len(eik_coords)), c = true_sol, cmap = colormap2)
-        plt.quiver(xiG, yiG, trueGMesh[:, 0], trueGMesh[:, 1])
-        plt.colorbar(im2)
-        plt.title("Eikonal on triangulation points and gradients, ratio=" + '{:.4f}'.format(eta2/eta1))
-        ax = plt.gca()
-        ax.set_aspect('equal')
-        ax.set_xlim([-18,18])
-        ax.set_ylim([-18,24])
-        if (saveFigures):
-            plt.savefig(path_figures + H + "/" + H + '_EikonalTriangulationGrads_' + str(k) + '.png', dpi=my_dpi * 10)
-        # Level sets of exact solution on triangulation
-        fig = plt.figure(figsize=(800/my_dpi, 800/my_dpi), dpi=my_dpi)
-        im3 = plt.contourf(xi, yi, zi_lin, cmap = colormap2, levels = 30 )
-        plt.contour(xi, yi, zi_lin, colors = ["white"], levels = 30)
-        plt.title("Level sets exact solution, ratio=" + '{:.4f}'.format(eta2/eta1))
-        plt.colorbar(im3)
-        ax = plt.gca()
-        ax.set_aspect('equal')
-        ax.set_xlim([-18,18])
-        ax.set_ylim([-18,24])
-        if (saveFigures):
-            plt.savefig(path_figures + H + "/" + H + '_LevelSetsExact_' + str(k) + '.png', dpi=my_dpi * 10)
-        # Level sets and gradients
-        fig = plt.figure(figsize=(800/my_dpi, 800/my_dpi), dpi=my_dpi)
-        im4 = plt.contourf(xi, yi, zi_lin, cmap = colormap2, levels = 30 )
-        plt.quiver(xiG, yiG, trueGMesh[:, 0], trueGMesh[:, 1])
-        plt.title("Level sets exact solution and gradients, ratio=" + '{:.4f}'.format(eta2/eta1))
-        plt.colorbar(im4)
-        ax = plt.gca()
-        ax.set_aspect('equal')
-        ax.set_xlim([-18,18])
-        ax.set_ylim([-18,24])
-        if (saveFigures):
-            plt.savefig(path_figures + H + "/" + H + '_LevelSetsExactGrads_' + str(k) + '.png', dpi=my_dpi * 10)
-        # Type of solution
-        fig = plt.figure(figsize = (800/my_dpi, 800/my_dpi), dpi = my_dpi)
-        im5 = plt.scatter(eik_coords[:, 0], eik_coords[:, 1], s = 2 + round(7000/len(eik_coords)), c = typeSol, cmap = colormap3)
-        plt.colorbar(im5)
-        plt.title("Type of solution, ratio=" + '{:.4f}'.format(eta2/eta1))
-        ax = plt.gca()
-        ax.set_aspect('equal')
-        ax.set_xlim([-18,18])
-        ax.set_ylim([-18,24])
-        if (saveFigures):
-            plt.savefig(path_figures + H + "/" + H + '_TypeSol_' + str(k) + '.png', dpi=my_dpi * 10)
+        # interp_lin = tri.LinearTriInterpolator(triang, true_sol)
+        # zi_lin = interp_lin(xi, yi)
+        # # For the gradients
+        # trueGMesh = np.zeros((100, 2))
+        # for i in range(10):
+        #     for j in range(10):
+        #         _, _, gMesh = trueSolution( xiG[i,j], yiG[i,j], x0, center, R, eta1, eta2)
+        #         trueGMesh[j + 10*i, 0] = gMesh[0]
+        #         trueGMesh[j + 10*i, 1] = gMesh[1]
+        # # Points on triangulation and exact eikonal
+        # fig = plt.figure(figsize = (800/my_dpi, 800/my_dpi), dpi = my_dpi)
+        # plt.triplot( eik_coords[:, 0], eik_coords[:, 1], triangles_points, '-', c = "#d4bdff", lw = 0.3 )
+        # im1 = plt.scatter(eik_coords[:, 0], eik_coords[:, 1], s = 2 + round(7500/len(eik_coords)), c = true_sol, cmap = colormap2)
+        # plt.colorbar(im1)
+        # plt.title("Eikonal on triangulation points, ratio=" + '{:.4f}'.format(eta2/eta1))
+        # ax = plt.gca()
+        # ax.set_aspect('equal')
+        # ax.set_xlim([-18,18])
+        # ax.set_ylim([-18,24])
+        # if (saveFigures):
+        #     plt.savefig(path_figures + H + "/" + H + '_EikonalTriangulation_' + str(k) + '.png', dpi=my_dpi * 10)
+        # # Points on triangulation, exact eikonal and gradients
+        # fig = plt.figure(figsize = (800/my_dpi, 800/my_dpi), dpi = my_dpi)
+        # plt.triplot( eik_coords[:, 0], eik_coords[:, 1], triangles_points, '-', c = "#d4bdff", lw = 0.3 )
+        # im2 = plt.scatter(eik_coords[:, 0], eik_coords[:, 1], s = 2 + round(7000/len(eik_coords)), c = true_sol, cmap = colormap2)
+        # plt.quiver(xiG, yiG, trueGMesh[:, 0], trueGMesh[:, 1])
+        # plt.colorbar(im2)
+        # plt.title("Eikonal on triangulation points and gradients, ratio=" + '{:.4f}'.format(eta2/eta1))
+        # ax = plt.gca()
+        # ax.set_aspect('equal')
+        # ax.set_xlim([-18,18])
+        # ax.set_ylim([-18,24])
+        # if (saveFigures):
+        #     plt.savefig(path_figures + H + "/" + H + '_EikonalTriangulationGrads_' + str(k) + '.png', dpi=my_dpi * 10)
+        # # Level sets of exact solution on triangulation
+        # fig = plt.figure(figsize=(800/my_dpi, 800/my_dpi), dpi=my_dpi)
+        # im3 = plt.contourf(xi, yi, zi_lin, cmap = colormap2, levels = 30 )
+        # plt.contour(xi, yi, zi_lin, colors = ["white"], levels = 30)
+        # plt.title("Level sets exact solution, ratio=" + '{:.4f}'.format(eta2/eta1))
+        # plt.colorbar(im3)
+        # ax = plt.gca()
+        # ax.set_aspect('equal')
+        # ax.set_xlim([-18,18])
+        # ax.set_ylim([-18,24])
+        # if (saveFigures):
+        #     plt.savefig(path_figures + H + "/" + H + '_LevelSetsExact_' + str(k) + '.png', dpi=my_dpi * 10)
+        # # Level sets and gradients
+        # fig = plt.figure(figsize=(800/my_dpi, 800/my_dpi), dpi=my_dpi)
+        # im4 = plt.contourf(xi, yi, zi_lin, cmap = colormap2, levels = 30 )
+        # plt.quiver(xiG, yiG, trueGMesh[:, 0], trueGMesh[:, 1])
+        # plt.title("Level sets exact solution and gradients, ratio=" + '{:.4f}'.format(eta2/eta1))
+        # plt.colorbar(im4)
+        # ax = plt.gca()
+        # ax.set_aspect('equal')
+        # ax.set_xlim([-18,18])
+        # ax.set_ylim([-18,24])
+        # if (saveFigures):
+        #     plt.savefig(path_figures + H + "/" + H + '_LevelSetsExactGrads_' + str(k) + '.png', dpi=my_dpi * 10)
+        # # Type of solution
+        # fig = plt.figure(figsize = (800/my_dpi, 800/my_dpi), dpi = my_dpi)
+        # im5 = plt.scatter(eik_coords[:, 0], eik_coords[:, 1], s = 2 + round(7000/len(eik_coords)), c = typeSol, cmap = colormap3)
+        # plt.colorbar(im5)
+        # plt.title("Type of solution, ratio=" + '{:.4f}'.format(eta2/eta1))
+        # ax = plt.gca()
+        # ax.set_aspect('equal')
+        # ax.set_xlim([-18,18])
+        # ax.set_ylim([-18,24])
+        # if (saveFigures):
+        #     plt.savefig(path_figures + H + "/" + H + '_TypeSol_' + str(k) + '.png', dpi=my_dpi * 10)
 
 
 

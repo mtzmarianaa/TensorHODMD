@@ -17,6 +17,7 @@ def DMD_Schmid(Xm, Ym, k = None, tol = None):
        - Xm (n,m) matrix that defines a sequence of snapshots
        - Ym (n,m) matrix that defines a sequence of snapshots
        - k  truncation parameter, numerical rank
+       - tol tolerance for the residual
     Assumption: m<<n
     Out:
        - Zk  Ritz vectors
@@ -30,7 +31,7 @@ def DMD_Schmid(Xm, Ym, k = None, tol = None):
     Q, R = qr(Xm)
     U, S, Vh = svd(R, full_matrices = False) # Reduced SVD
     # Determine the numerical rank heuristically for now
-    if(k is None or k>len(S) and tol is None):
+    if((k is None or k>len(S)) and tol is None):
         k = 10
         k = np.min([k, len(S), m/2])
     elif(tol is not None):
@@ -40,15 +41,16 @@ def DMD_Schmid(Xm, Ym, k = None, tol = None):
             k = len(S)
         else:
             k = ind[0]
+    else:
+        tol = 1e-8
     # Truncate
     k = int(k)
-    print(k)
     U, S, Vh = U[:, 0:k], S[0:k], Vh[0:k, :]
     # Schmid's formula for the Rayleigh quotient
     U = Q@U
-    breakpoint()
     Sk = ( (U.conj().T@Ym)@Vh.conj().T  )
-    Sk = Sk*(1/S)
+    Sinv = [1/s if s>tol else 0 for s in S]
+    Sk = Sk*Sinv
     # Eigenvalues of the Rayleigh quotient
     Lamk, Wk = eig(Sk)
     # Get Ritz vectors
@@ -68,6 +70,7 @@ def DMD_Enhanced(Xm, Ym, k = None, tol = 1e-8):
     Out:
        - Zk  Ritz vectors
        - Lamk Eigenvalues
+       - res optimal residuals found
     '''
     m, n = Xm.shape
     assert(Xm.shape == Ym.shape, "Snapshot matrices should be the same size")
@@ -108,8 +111,36 @@ def DMD_Enhanced(Xm, Ym, k = None, tol = 1e-8):
         indSmallest = max(0, np.where(SigmaLam<tol)[0])
         Wk[:, i] = WLam[indSmallest-1]
         res[i] = SigmaLam[indSmallest]
-        print("Residual: ", res[i])
+        #print("Residual: ", res[i])
     Zk = U@Wk
     return Zk, Lamk, res
+
+
+def DMD_QR(Xm, Ym, k = None, tol = 1e-8):
+    '''
+    QR compressed DMD as in lecture notes from the couse
+    Numerical linear algebra for Koopman and DMD.
+    In:
+       - Xm (n,m) matrix that defines a sequence of snapshots
+       - Ym (n,m) matrix that defines a sequence of snapshots
+       - k  truncation parameter, numerical rank
+       - tol tolerance for the residual
+    Assumption: m<<n
+    Out:
+       - Zk  Ritz vectors
+       - Lamk Eigenvalues
+    '''
+    m, n = Xm.shape
+    assert(Xm.shape == Ym.shape, "Snapshot matrices should be the same size")
+    assert(m < n, "m should be smaller than n")
+    assert(tol>0, "tolerance should be positive")
+    X = np.empty((m, n+1))
+    Q, R = qr(X) # Thin QR factorization, compressed representation of the data
+    Rx = R[:, 0:n]
+    Ry = R[:, 1:]
+    Zk, Lamk = DMD_Schmid(Rx, Ry, k = k, tol = tol)
+    Zk = Q@Zk
+    return Zk, Lamk
+    
 
     
