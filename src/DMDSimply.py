@@ -49,8 +49,8 @@ def DMD_Schmid(Xm, Ym, k = None, tol = None):
     # Schmid's formula for the Rayleigh quotient
     U = Q@U
     Sk = ( (U.conj().T@Ym)@Vh.conj().T  )
-    Sinv = [1/s if s>tol else 0 for s in S]
-    Sk = Sk*Sinv
+    Sinv = np.array([1/s if s>tol else 0 for s in S])
+    Sk = Sk*Sinv[:, np.newaxis]
     # Eigenvalues of the Rayleigh quotient
     Lamk, Wk = eig(Sk)
     # Get Ritz vectors
@@ -135,6 +135,9 @@ def DMD_QR(Xm, Ym, k = None, tol = 1e-8):
     assert(m < n, "m should be smaller than n")
     assert(tol>0, "tolerance should be positive")
     X = np.empty((m, n+1))
+    X[:, 0:n] = Xm
+    X[:, -1] = Ym[:, -1]
+    breakpoint()
     Q, R = qr(X) # Thin QR factorization, compressed representation of the data
     Rx = R[:, 0:n]
     Ry = R[:, 1:]
