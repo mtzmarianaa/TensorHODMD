@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.linalg import qr, svd, norm, eig
-from tutils import *
+from src.tutils import *
 import pdb
 
 # For tensor DMD we first need the reduced matrix A tilde
@@ -72,3 +72,31 @@ def tensorDMD(X = None, Y = None, coresX = None,
     # Return the eigenvalues
     return Lamk, phi, coresX, coresY
 
+
+def streamingTensorDMD(coresX, ranksX, coresY, ranksY, XNew, YNew, eps = 1e-9):
+    '''
+    Streaming version of tensor DMD. Given new information
+    in Xnew and YNew we use TT-ICE to add such information to our
+    TT trains and proceed as in tensor DMD
+    '''
+    # Add the new information
+    coresXNew, ranksXNew = tt_ice(coresX, ranksX, XNew, tol = eps)
+    coresYNew, ranksYNew = tt_ice(coresY, ranksY, YNew, tol = eps)
+    # Compute Atilde
+    Atilde, coresXpi, rankspi, Sinv = getACom(coresX = coresXNew, ranksX = ranksXNew,
+                                              coresY = coresYNew, ranksY = ranksYNew,
+                                              eps = eps)
+    # Proceed as in tensorDMD
+    # Compute eigenvalues
+    Lamk, Wk = eig(Atilde)
+    # Then get the DMD modes in a TT-representation
+    dd = len(coresXNew)
+    MT = coresXpi[0:dd-1]
+    # Contract the last core of MT with the matrix of Eigenvalues
+    # but we don't really contract it, we just represent the
+    # DMD modes in TT form
+    Wk = np.reshape(Wk, (*Wk.shape, 1))
+    phi = MT + [Wk]
+    # Return the eigenvalues
+    return Lamk, phi, coresX, coresY
+    

@@ -36,12 +36,12 @@ my_dpi=96
 eta1 = 1.0
 eta2s = np.linspace(0.75, 1.5, 40)
 #eta2s = np.append(eta2s, eta2s - 0.8 + 1.5)
-x0_default = np.array([-15+0.9, -10+0.9])
+x0_default = np.array([-15, -10])
 center_default = np.array([0,0])
 R_default = 10.0
 path_figures = "tests/TestEikonal/TestEikonal/"
 path_info = "tests/TestEikonal/TestEikonal/"
-H = "H0"
+H = "H10"
 
 
 def plotSnapshots(H, eta1 = eta1, eta2s = eta2s, eik_coords = None, triangles_points = None, x0 = x0_default, center = center_default,

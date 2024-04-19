@@ -137,7 +137,6 @@ def DMD_QR(Xm, Ym, k = None, tol = 1e-8):
     X = np.empty((m, n+1))
     X[:, 0:n] = Xm
     X[:, -1] = Ym[:, -1]
-    breakpoint()
     Q, R = qr(X) # Thin QR factorization, compressed representation of the data
     Rx = R[:, 0:n]
     Ry = R[:, 1:]

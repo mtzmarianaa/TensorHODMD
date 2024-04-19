@@ -21,11 +21,11 @@ colormap2_r = "cet_linear_worb_100_25_c53"
 
 plt.ion()
 
-h =  0.2
+h =  0.1
 h_string = str(h)
 eta1 = 1.0
 eta2 = 1.0
-currentH = "H1"
+currentH = "H10"
 path_figures = "TestEikonal/"
 path_info = 'TestEikonal/'
 

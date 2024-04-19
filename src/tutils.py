@@ -208,3 +208,74 @@ def transposeTT(cores, ranks):
         cores[k] = cores[k].T
     return cores, ranks
 
+
+def tt_ice(cores, ranks, Y, tol = 1e-9):
+    '''
+    Algorithm 3.1, TT-ICE from
+    Aksoy, Gorsich, Veerapaneni, Gorodetsky
+    "An incremental tensor train decomposition algorithm"
+    Incrementally updates the tt decomposition of a stream of
+    tensor data.
+    '''
+    # Preprocessing the first dimension
+    d = len(cores)
+    cores_new = []
+    ranks_new = ranks.copy()
+    assert( d == len(Y), "Incompatible order of tensors")
+    nks = [cores[i].shape[1] for i in range(d)]
+    Yi = np.reshape(Y, (nks[0], -1))
+    Ui = np.reshape( cores[0], (nks[0], ranks[0]) )
+    Ri = (np.eye(Ui.shape[0]) - Ui@Ui.T)@Yi
+    Ui_pad = Ui # First core has no padding
+    # Update the cores
+    for i in range(d-2):
+        if( norm(Ri) > tol):
+            U, S, Vh = svd(Ri, full_matrices = False)
+            # Truncate
+            s = np.where(S<tol)[0]
+            if(len(s)==0):
+                s = len(S)
+            else:
+                s = s[0]
+            U, S, Vh = U[:, 0:s], S[0:s], Vh[0:s, :]
+            Ui = np.concatenate((Ui_pad, U), axis = 1 )
+        else:
+            Ui = Ui_pad
+            s = 0
+        # Save
+        ranks_new[i] += s
+        cores_new += [ np.reshape(Ui, (-1, nks[i], ranks_new[i] ) ) ]
+        # Pad for rank compatibility
+        Ui = np.reshape( cores[i+1], (ranks[i]*nks[i+1], -1) )
+        Ui_pad = np.reshape( np.concatenate((np.reshape(Ui, (ranks[i], -1)), np.zeros((s, nks[i+1]*ranks[i+1])) ), axis = 0), (ranks_new[i]*nks[i+1], ranks[i+1]) )
+        # Preprocessing the subsequent dimensions
+        Yi = np.reshape( np.reshape(cores_new[i], (-1, ranks_new[i])).T@Yi, (ranks_new[i]*nks[i+1], -1))
+        Ri = Yi - Ui_pad@(Ui_pad.T@Yi)
+        #Ri = (np.eye(Ui_pad.shape[0]) - Ui_pad@Ui_pad.T)@Yi
+    # Updating the d-th core
+    if( norm(Ri)>tol):
+        U, S, Vh = svd(Ri, full_matrices = False)
+        # Truncate
+        s = np.where(S<tol)[0]
+        if(len(s) == 0):
+            s = len(S)
+        else:
+            s = s[0]
+        U, S, Vh = U[:, 0:s], S[0:s], Vh[0:s, :]
+        Ui = np.concatenate((Ui_pad, U), axis = 1)
+    else:
+        Ui = Ui_pad
+        s = 0
+    ranks_new[-1] += s
+    cores_new += [ np.reshape( Ui, (ranks_new[-2], nks[-2], ranks_new[-1] )  )]
+    # Update the last core
+    Ui_pad = np.concatenate((np.reshape(cores[-1], (ranks[-1], -1)), np.zeros((s, nks[-1])) ), axis = 0)
+    Yi = Ui.T@Yi
+    Ui = np.concatenate( (Ui_pad, Yi), axis = 1)
+    Ui = np.reshape(Ui, (ranks_new[-1], -1, 1))
+    cores_new += [ Ui ]
+    return cores_new, ranks_new
+    
+    
+
+    

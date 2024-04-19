@@ -18,6 +18,7 @@ eik_coords = np.genfromtxt(path_info + H + "/" + H + "_MeshPoints.txt", delimite
 triangles_points = np.genfromtxt(path_info + H + "/" + H + "_Faces.txt", delimiter=",")
 triang = tri.Triangulation(eik_coords[:, 0], eik_coords[:, 1], triangles_points)
 nPoints = len(eik_coords)
+my_dpi=96
 
 
 # Read the data
@@ -32,7 +33,7 @@ m = ds[-1]
 X = TX[:, :, :, 0:(m-1)]
 Y = TX[:, :, :, 1:]
 
-# Compute the DMD nodes
+# Compute the TDMD nodes
 Lamk, phi, coresX, coresY =  tensorDMD(X, Y)
 
 # Plot
@@ -53,7 +54,7 @@ for i in range(nPlot):
     plt.triplot( eik_coords[:, 0], eik_coords[:, 1], triangles_points, '-', c = "#d4bdff", lw = 0.3 )
     im = plt.scatter(eik_coords[:, 0], eik_coords[:, 1], s = 2 + round(7500/len(eik_coords)), c = eikdmdMode[:,0], cmap = colormap)
     plt.colorbar(im)
-    plt.title("DMD mode for eikonal value with $\lambda =$" + '{}'.format(lambd))
+    plt.title("TDMD mode for eikonal value with $\lambda =$" + '{}'.format(lambd))
     ax = plt.gca()
     ax.set_aspect('equal')
     ax.set_xlim([-18,18])
@@ -65,7 +66,7 @@ for i in range(nPlot):
     im = plt.scatter(eik_coords[:, 0], eik_coords[:, 1], s = 2 + round(7500/len(eik_coords)), c = eikdmdMode[:,0], cmap = colormap)
     plt.quiver( eik_coords[:, 0], eik_coords[:, 1], graddmdMode[:, 0], graddmdMode[:,1], scale = 30  )
     plt.colorbar(im)
-    plt.title("DMD mode for eikonal value and gradients with $\lambda =$" + '{}'.format(lambd))
+    plt.title("TDMD mode for eikonal value and gradients with $\lambda =$" + '{}'.format(lambd))
     ax = plt.gca()
     ax.set_aspect('equal')
     ax.set_xlim([-18,18])
@@ -76,7 +77,7 @@ for i in range(nPlot):
     plt.triplot( eik_coords[:, 0], eik_coords[:, 1], triangles_points, '-', c = "#d4bdff", lw = 0.3 )
     im = plt.scatter(eik_coords[:, 0], eik_coords[:, 1], s = 2 + round(7500/len(eik_coords)), c = typeSoldmdMode[:,0], cmap = colormap)
     plt.colorbar(im)
-    plt.title("DMD mode for type of solution with $\lambda =$" + '{}'.format(lambd))
+    plt.title("TDMD mode for type of solution with $\lambda =$" + '{}'.format(lambd))
     ax = plt.gca()
     ax.set_aspect('equal')
     ax.set_xlim([-18,18])
